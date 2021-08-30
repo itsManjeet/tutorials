@@ -12,5 +12,5 @@ find_package(glfw3 REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
 
 file(GLOB Sample_OpenGL_Window "sample-opengl/*.cc")
-add_executable(sample-opengl ${Sample_OpenGL_Window})
+add_executable(sample-opengl sample-gif/decoder.cc ${Sample_OpenGL_Window})
 target_link_libraries(sample-opengl ${OPENGL_LIBRARIES} glfw)
