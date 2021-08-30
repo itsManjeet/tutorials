@@ -123,6 +123,12 @@ int main(int ac, char **av)
     bob::GifDecoder decoder;
     decoder.load("input.gif");
     uint32_t const *data = decoder.getFrame(0);
+    if (!data)
+    {
+        cerr << "Failed to load texture" << endl;
+        glfwTerminate();
+        return -1;
+    }
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, decoder.getWidth(), decoder.getHeight(), 0, GL_RGB, GL_UNSIGNED_INT, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -136,7 +142,7 @@ int main(int ac, char **av)
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwPollEvents();
         glfwSwapBuffers(window);
