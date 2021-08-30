@@ -8,9 +8,9 @@ add_executable(sample-gif ${Sample_Gif_Src})
 target_link_libraries(sample-gif ${LIBPTHREAD})
 
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+find_package(glfw3 REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIRS})
 
 file(GLOB Sample_OpenGL_Window "sample-opengl/*.cc")
 add_executable(sample-opengl ${Sample_OpenGL_Window})
-target_link_libraries(sample-opengl ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(sample-opengl ${OPENGL_LIBRARIES} glfw)
