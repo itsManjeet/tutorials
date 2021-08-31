@@ -13,4 +13,4 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 
 file(GLOB Sample_OpenGL_Window "sample-opengl/*.cc")
 add_executable(sample-opengl sample-gif/decoder.cc ${Sample_OpenGL_Window})
-target_link_libraries(sample-opengl ${OPENGL_LIBRARIES} glfw)
+target_link_libraries(sample-opengl ${OPENGL_LIBRARIES} glfw GLEW)
