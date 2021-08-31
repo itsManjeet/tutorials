@@ -26,23 +26,63 @@ int main(int ac, char **av)
         return 1;
     }
 
+    /**
+     *             (0.0, 1.0)
+     * 
+     *  (-1.0, 0.0)         (1.0, 0.0)
+     */
+
+    float pos[] = {
+        0.0f, 1.0f,
+        -1.0f, 0.0f,
+        1.0f, 0.0f};
+
+    /**
+     * Steps of creating Buffer
+     * 1. Generate Buffer Space
+     * 2. Specify target type and bind buffer to opengl
+     * 3. Bind Data
+     *    a. size : in bytes
+     *    b. usage: GL_(FREQ)_(NATURE) of access
+     *       (only gave hints of the regarding access, not a constraints
+     *        slow the process if not a appro. one)
+     */
+
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+
+    glBufferData(GL_ARRAY_BUFFER,
+                 6 * sizeof(float), // SIZE in Bytes
+                 pos,
+                 GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(0,                 // Starting index
+                          2,                 // Amount of indices for 1 vertex
+                          GL_FLOAT,          // Type
+                          GL_FALSE,          // Normalize (convert into float, (false as already float))
+                          sizeof(float) * 2, // Space between starting and next vertex index
+                          0);
+
     while (!glfwWindowShouldClose(window))
     {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        /**
-         *             (0.0, 1.0)
+        glDrawArrays(GL_TRIANGLES, // Mode
+                     0,            // Starting index of active array
+                     3);           // counts of vertex
+
+        /** 
+         * SINGLE_BUFFER - Flush()
          * 
-         *  (-1.0, 0.0)         (1.0, 0.0)
+         * DUBLE_BUFFER - SwapBuffer 
          */
-        glBegin(GL_TRIANGLES);
-            glVertex2f(0.0f, 1.0f);
-            glVertex2f(-1.0f, 0.0f);
-            glVertex2f(1.0f, 0.0f);
-        glEnd();
 
         glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     glfwTerminate();
