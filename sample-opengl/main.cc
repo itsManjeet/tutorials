@@ -11,21 +11,21 @@ void displayFunc()
 
     glBegin(GL_TRIANGLES);
     /**
-     *                    (0.0, 1.0) (GREEN)
+     *  (-1.0, 1.0)              (1.0, 1.0)
      * 
      * 
-     *  (-1.0, 0.0) (RED)               (1.0, 0.0) (BLUE)
+     *  (-1.0, 0.0)              (1.0, 0.0)
      */
 
-        glColor3f(1, 0, 0); // RED
-        glVertex2f(-1.0, 0.0);
-
-        glColor3f(0, 1, 0); // GREEN
-        glVertex2f(0.0, 1.0);
-
-        glColor3f(0, 0, 1); // BLUE
-        glVertex2f(1.0, 0.0);
-
+        glColor3f(1, 0, 0);
+            glVertex2f(-1.0, 1.0);
+            glVertex2f(-1.0, 0.0);
+            glVertex2f(1.0, 0.0);
+        glColor3f(0, 1, 0);
+            glVertex2f(-1.0, 1.0);
+            glVertex2f(1.0, 1.0);
+            glVertex2f(1.0, 0.0);
+            
     glEnd();
 
     glFlush();
