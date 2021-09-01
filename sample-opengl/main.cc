@@ -29,15 +29,24 @@ int main(int ac, char **av)
     }
 
     /**
-     *             (0.0, 1.0)
+     *  -0.5, 0.5  (3)      0.5, 0.5 (0)
      * 
-     *  (-1.0, 0.0)         (1.0, 0.0)
+     *                 
+     * 
+     *  -0.5, -0.5 (2)      0.5, -0.5 (1)
      */
 
+    // in anti-clock-wise order
     float pos[] = {
-        0.0f, 1.0f,
-        -1.0f, 0.0f,
-        1.0f, 0.0f};
+        0.5f, 0.5f,   // 0
+        0.5f, -0.5f,  // 1
+        -0.5f, -0.5f, // 2
+        -0.5f, 0.5f}; // 3
+
+    unsigned int indices[] = {
+        0, 1, 2, // First triangle
+        2, 3, 0, // Second triangle
+    };
 
     /**
      * Steps of creating Buffer
@@ -55,7 +64,7 @@ int main(int ac, char **av)
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
     glBufferData(GL_ARRAY_BUFFER,
-                 6 * sizeof(float), // SIZE in Bytes
+                 8 * sizeof(float), // SIZE in Bytes
                  pos,
                  GL_STATIC_DRAW);
 
@@ -68,6 +77,11 @@ int main(int ac, char **av)
                           sizeof(float) * 2, // Space between starting and next vertex index
                           0);
 
+    unsigned int index_buffer;
+    glGenBuffers(1, &index_buffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+
     auto shader_program = gen_shader_program("sample-opengl/shaders");
     glUseProgram(shader_program);
 
@@ -76,9 +90,7 @@ int main(int ac, char **av)
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, // Mode
-                     0,            // Starting index of active array
-                     3);           // counts of vertex
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         /** 
          * SINGLE_BUFFER - Flush()
