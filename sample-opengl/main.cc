@@ -6,6 +6,9 @@ using namespace std;
 
 #include "shaders.hh"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 static void error_callback(
     unsigned int source,
     unsigned int type,
@@ -55,10 +58,10 @@ int main(int ac, char **av)
 
     // in anti-clock-wise order
     float pos[] = {
-        0.5f, 0.5f,   // 0
-        0.5f, -0.5f,  // 1
-        -0.5f, -0.5f, // 2
-        -0.5f, 0.5f}; // 3
+        -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f}; // 3
 
     unsigned int indices[] = {
         0, 1, 2, // First triangle
@@ -76,38 +79,61 @@ int main(int ac, char **av)
      *        slow the process if not a appro. one)
      */
 
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    unsigned int arr_buf_id;
+    glGenVertexArrays(1, &arr_buf_id);
+    glBindVertexArray(arr_buf_id);
 
-    glBufferData(GL_ARRAY_BUFFER,
-                 8 * sizeof(float), // SIZE in Bytes
-                 pos,
-                 GL_STATIC_DRAW);
+    unsigned int ver_buf_id;
+    glGenBuffers(1, &ver_buf_id);
+    glBindBuffer(GL_ARRAY_BUFFER, ver_buf_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pos), pos, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
+    unsigned int idx_buf_id;
+    glGenBuffers(1, &idx_buf_id);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx_buf_id);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0,                 // Starting index
-                          2,                 // Amount of indices for 1 vertex
-                          GL_FLOAT,          // Type
-                          GL_FALSE,          // Normalize (convert into float, (false as already float))
-                          sizeof(float) * 2, // Space between starting and next vertex index
-                          0);
+    unsigned int shader_prog_id;
+    shader_prog_id = gen_shader_program("sample-opengl/shaders");
+    if (shader_prog_id == 0)
+        cerr << "Error! in shader program" << endl;
 
-    unsigned int index_buffer;
-    glGenBuffers(1, &index_buffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    glUseProgram(shader_prog_id);
 
-    auto shader_program = gen_shader_program("sample-opengl/shaders");
-    glUseProgram(shader_program);
+    GLint pos_attrib = glGetAttribLocation(shader_prog_id, "position");
+    glEnableVertexAttribArray(pos_attrib);
+    glVertexAttribPointer(pos_attrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), 0);
+
+    GLint color_attrib = glGetAttribLocation(shader_prog_id, "color");
+    glEnableVertexAttribArray(color_attrib);
+    glVertexAttribPointer(color_attrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)(2 * sizeof(float)));
+
+    GLint tex_attrib = glGetAttribLocation(shader_prog_id, "texcoord");
+    glEnableVertexAttribArray(tex_attrib);
+    glVertexAttribPointer(tex_attrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)(5 * sizeof(float)));
+
+    unsigned int texture;
+    glGenTextures(2, &texture);
+
+    int width, height;
+    unsigned char *data;
+    glBindTexture(GL_TEXTURE_2D, texture);
+    data = stbi_load("input.png", &width, &height, 0, STBI_rgb);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    stbi_image_free(data);
+    glUniform1i(glGetUniformLocation(shader_prog_id, "tex"), 0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     while (!glfwWindowShouldClose(window))
     {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         /** 
          * SINGLE_BUFFER - Flush()
