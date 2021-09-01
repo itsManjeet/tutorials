@@ -6,6 +6,20 @@ using namespace std;
 
 #include "shaders.hh"
 
+static void error_callback(
+    unsigned int source,
+    unsigned int type,
+    unsigned int id,
+    unsigned int serverity,
+    int length,
+    char const *message,
+    void const *user_param)
+{
+    fprintf(stderr, "CALLBACK: %s, TYPE : 0x%x, Serverity : 0x%x\nMessage: %s\n",
+            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+            type, serverity, message);
+}
+
 int main(int ac, char **av)
 {
     GLFWwindow *window;
@@ -27,6 +41,9 @@ int main(int ac, char **av)
         cout << "Error! failed to init glew" << endl;
         return 1;
     }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(error_callback, 0);
 
     /**
      *  -0.5, 0.5  (3)      0.5, 0.5 (0)
